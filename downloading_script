@@ -1,0 +1,31 @@
+from ftplib import FTP
+
+
+ftp = FTP('ftp.patricbrc.org')
+ftp.login()
+
+#downloading function:
+def grabFile(strain):
+    filename = strain + '.PATRIC.pathway.tab'
+    localfile = open(filename, 'wb')
+    ftp.retrbinary('RETR ' + filename, localfile.write, 1024)
+    localfile.close()
+
+#We're opening prepared file with IDs of PATRIC's strains and making a list :
+with open('genID.tsv') as ids:
+    genIDs = []
+    for i in ids:
+        genIDs.append(i.strip())
+
+#getting files from ftp
+for strains in genIDs:
+    try:
+            ftp.cwd('/genomes/' + strains + '/')
+            grabFile(strains)
+            print(strains)
+#writing strains in which error occured
+    except Exception as e:
+        with open('err_report.txt', 'a+') as er_rep:
+            er_rep.write(strains + ' || ' + '\n')
+
+ftp.close()
